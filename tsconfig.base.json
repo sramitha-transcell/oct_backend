@@ -6,8 +6,9 @@
     "importHelpers": true,
     "isolatedModules": true,
     "lib": ["es2022"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -18,6 +19,10 @@
     "target": "es2022",
     "customConditions": ["@org/source"],
     "noUncheckedSideEffectImports": false,
-    "types": ["*"]
+    "types": ["*"],
+    "paths": {
+      "@oct-backend/shared-utils": ["./libs/shared-utils/src/index.ts"],
+      "@org/shared-utils": ["./libs/shared-utils/src/index.ts"]
+    }
   }
 }
