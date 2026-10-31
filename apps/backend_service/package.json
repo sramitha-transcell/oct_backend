@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx watch src/main.ts"
+  },
   "nx": {
     "targets": {
       "prune-lockfile": {
@@ -41,16 +45,16 @@
       },
       "serve": {
         "continuous": true,
-        "dependsOn": [
-          "^build"
-        ],
-        "readyWhen": {
-          "signal": true
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "tsx watch src/main.ts",
+          "cwd": "apps/backend_service"
         }
       }
     }
   },
   "dependencies": {
+    "@oct-backend/shared-utils": "*",
     "express": "^5.1.0"
   }
 }

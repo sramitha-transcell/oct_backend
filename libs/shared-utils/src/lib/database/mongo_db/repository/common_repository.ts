@@ -2,24 +2,24 @@ import type { Model } from 'mongoose';
 
 type AnyObject = Record<string, any>;
 
-export const createDocument = async (model: Model<any>, data: AnyObject) => {
+export const createDocument = async (model: Model<any, any, any, any>, data: AnyObject) => {
     return await model.create(data);
 };
 
-export const updateDocument = async (model: Model<any>, query: AnyObject, data: AnyObject) => {
+export const updateDocument = async (model: Model<any, any, any, any>, query: AnyObject, data: AnyObject) => {
     return await model.findOneAndUpdate(query, { $set: data }, { new: true });
 };
 
-export const deleteDocument = async (model: Model<any>, query: AnyObject): Promise<any> => {
+export const deleteDocument = async (model: Model<any, any, any, any>, query: AnyObject): Promise<any> => {
     return await model.deleteOne(query);
 };
 
-export const getOne = async (model: Model<any>, query: AnyObject, projection?: AnyObject) => {
+export const getOne = async (model: Model<any, any, any, any>, query: AnyObject, projection?: AnyObject) => {
     return await model.findOne(query).select(projection || {}).lean();
 };
 
 export const listDocuments = async (
-    model: Model<any>,
+    model: Model<any, any, any, any>,
     query: AnyObject,
     perPage: number,
     pageNo: number,
@@ -43,7 +43,7 @@ export const listDocuments = async (
 };
 
 export const getPagination = async (
-    model: Model<any>,
+    model: Model<any, any, any, any>,
     query: AnyObject,
     perPage: number,
     pageNo: number
@@ -67,15 +67,15 @@ export const getPagination = async (
     };
 };
 
-export const getCount = async (model: Model<any>, query: AnyObject) => {
+export const getCount = async (model: Model<any, any, any, any>, query: AnyObject) => {
     return await model.countDocuments(query);
 };
 
-export const upsertDocument = async (model: Model<any>, query: AnyObject, data: AnyObject) => {
+export const upsertDocument = async (model: Model<any, any, any, any>, query: AnyObject, data: AnyObject) => {
     return await model.findOneAndUpdate(query, { $set: data }, { upsert: true, new: true });
 };
 
-export const updateMany = async (model: Model<any>, query: AnyObject, data: AnyObject) => {
+export const updateMany = async (model: Model<any, any, any, any>, query: AnyObject, data: AnyObject) => {
     return await model.updateMany(query, { $set: data });
 };
 

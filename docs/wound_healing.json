@@ -1,0 +1,45 @@
+{
+    "assay_type": "Mycoplasma_qPCR",
+    "calculation_method": "Ct cutoff-based screening",
+    "assay_rules": {
+      "cutoff": 35,
+      "borderline": 1,
+      "borderline_lower_limit": 34,
+      "max_ct": 40,
+      "internal_control_min": 20,
+      "internal_control_max": 30,
+      "positive_control_requirement": "Ct < 35.0",
+      "negative_control_requirement": "Pass",
+      "extraction_blank_requirement": "Pass"
+    },
+    "samples": [
+      {
+        "sample_id": "MYCO_SAMPLE_001",
+        "target_ct": 32.5,
+        "internal_control_ct": 25
+      }
+    ],
+    "results": [
+      {
+        "sample_id": "MYCO_SAMPLE_001",
+        "target_ct": 32.5,
+        "target_ct_status": "ok",
+        "internal_control_ct": 25,
+        "internal_control_status": "ok",
+        "positive_control_ct": 28,
+        "positive_control_status": "ok",
+        "negative_control": "Pass",
+        "extraction_blank": "Pass",
+        "delta_ct_target_minus_positive_control": 4.5,
+        "cutoff": 35,
+        "borderline_range": {
+          "lower_inclusive": 34,
+          "upper_exclusive": 35
+        },
+        "screening_result": "Detected",
+        "interpretation": "Target Ct is below the borderline threshold of 34.0 and assay QC criteria passed.",
+        "qc_status": "Pass"
+      }
+    ],
+    "graphs": {}
+  }

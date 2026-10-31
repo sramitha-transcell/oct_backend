@@ -1,9 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
   // MongoDB connection options
   const mongooseOptions = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 20000, // Increased timeout
     socketTimeoutMS: 45000,
     family: 4  // Use IPv4, skip trying IPv6

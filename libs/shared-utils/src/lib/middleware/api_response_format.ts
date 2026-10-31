@@ -67,31 +67,7 @@ class ApiResponseFormat {
         };
     }
 
-    ONEST_ONDC_SUCCESS_RESP() {
-        return {
-            "message": {
-                "ack": {
-                    "status": "ACK"
-                }
-            }
-        };
-    }
 
-    ONEST_ONDC_FAILURE_RESP(error_type:string="", error_code:string="",error_message:any="", error_path:any="") {
-        return {
-            "message": {
-                "ack": {
-                    "status": "NACK"
-                }
-            },
-            "error": {
-                "type": error_type,
-                "code": error_code,
-                "path": `${error_path}`,
-                "message": `${error_message}`
-            }
-        };
-    }
 }
 
 // Export the class instance

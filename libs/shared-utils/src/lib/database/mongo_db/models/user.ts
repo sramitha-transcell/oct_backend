@@ -21,16 +21,11 @@ const userSchemas = new mongoose.Schema(
     },
     { _id: true, timestamps: true }
 )
- userSchemas.pre("save", async function (next) {
-    if (this.isNew) {
-        try {
-            const latestDocument = await this.constructor.findOne({}, {}, { sort: { id: -1 } });
-            this.id = latestDocument ? latestDocument.id + 1 : 1;
-        } catch (error) {
-            return next(error);
-        }
+ userSchemas.pre("save", async function () {
+    if (this.isNew && this.id == null) {
+        const latestDocument: any = await (this.constructor as any).findOne({}, {}, { sort: { id: -1 } });
+        this.id = latestDocument ? latestDocument.id + 1 : 1;
     }
-    next();
 });
 
  userSchemas.index({ id: 1, createdAt: -1 }); userSchemas.plugin(mongoosePaginate)

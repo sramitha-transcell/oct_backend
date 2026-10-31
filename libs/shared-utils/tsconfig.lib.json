@@ -9,5 +9,9 @@
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],
+  "exclude": [
+    "src/lib/database/mongo_db/repository/payout.ts",
+    "src/lib/database/mongo_db/repository/role.ts"
+  ],
   "references": []
 }

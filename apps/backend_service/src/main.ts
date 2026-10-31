@@ -1,35 +1,84 @@
-#!/usr/bin/env node
-// @nx-target-name: serve
 import express from 'express';
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import logger from "morgan";
+import router from './router'
 
-const host = process.env.HOST ?? 'localhost';
-const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+import { GlobalEnv } from './config/env'
+import { generateRandomAlphanumeric, connectWithRetry } from '@oct-backend/shared-utils';
 
-const app = express();
 
-app.get('/', (req, res) => {
-  res.send({ message: 'Hello API' });
-});
 
-const server = app.listen(port, host, async (error?: Error) => {
-  if (error) {
-    throw error;
+export default async function init(app: any) {
+
+
+  function customLogger(tokens: any, req: any, res: any) {
+    const date = new Date().toISOString(); // Current timestamp
+    const method = tokens.method(req, res); // HTTP method
+    const url = tokens.url(req, res); // URL requested
+    const httpVersion = "HTTP/" + req.httpVersion; // HTTP version
+    const statusCode = res.statusCode; // HTTP status code
+
+    // Construct custom log message
+    return `date: ${date}, ${method} ${url} ${httpVersion} ${statusCode}`;
   }
-  console.log(`[ ready ] http://${host}:${port}`);
-  // Set when Nx waits for this server to be ready
-  if (process.env.NX_READY_SIGNAL_SOCKET) {
-    try {
-      // Function keeps TypeScript and bundlers from rewriting or bundling the import
-      const load = new Function('s', 'return import(s)') as (
-        s: string,
-      ) => Promise<{ emitReadySignal(server: unknown): boolean }>;
-      (await load('@nx/js/ready-signal')).emitReadySignal(server);
-    } catch {
-      // @nx/js isn't installed
+
+  try {
+    console.log("Backend_Application: ", GlobalEnv);
+    const nums = await generateRandomAlphanumeric(8)
+    console.log(`Generated Random String: ${nums}`);
+
+    if (GlobalEnv?.DB_CONNECTION_STRING) {
+      console.log('Connecting to Database...');
+      await connectWithRetry(GlobalEnv?.DB_CONNECTION_STRING);
+      console.log('Database Connection Established');
     }
-  }
-});
+    app.use(cors());
+    app.use(cookieParser());
+    app.use(express.json({ limit: "50mb" }));
+    app.use(express.urlencoded({ limit: "50mb", extended: true }));
+    app.use(logger(customLogger));
 
-process.on('SIGTERM', () => {
-  server.close(() => process.exit(0));
-});
+    app.get('/', (req: any, res: any) => {
+      res.send({ message: 'Backend Application Working fine' });
+    });
+    // app.get('/logs', logsAuth, live_logs);
+
+
+    app.use('/api/v1/oct/backend', router);
+    app.use('/api/v1/transcell/backend', router);
+
+    app.use((req: any, res: any) => {
+      res.status(404).json({
+        "meta": {
+          "status": false,
+          "message": "page not found"
+        },
+        "error": {
+          "name": "page not found",
+          "message": "Page not found"
+        }
+      });
+    });
+
+    const server = app.listen(GlobalEnv?.PORT || 3001, () => {
+      console.log(`Backend_Application server listening on port : ${GlobalEnv?.PORT || 3001}`);
+    });
+
+    server.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`\n❌ Port ${GlobalEnv?.PORT || 3001} is already in use by another process.`);
+        console.error(`Please kill the process holding port ${GlobalEnv?.PORT || 3001} or change the PORT in config/env.ts.\n`);
+      } else {
+        console.error("Server error =====>>>>", err);
+      }
+      process.exit(1);
+    });
+  } catch (err) {
+    console.log("App Error =====>>>>", err)
+    process.exit(1)
+  }
+};
+
+const app = express()
+init(app)

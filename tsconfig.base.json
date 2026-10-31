@@ -21,8 +21,14 @@
     "noUncheckedSideEffectImports": false,
     "types": ["*"],
     "paths": {
-      "@oct-backend/shared-utils": ["./libs/shared-utils/src/index.ts"],
-      "@org/shared-utils": ["./libs/shared-utils/src/index.ts"]
+      "@oct-backend/shared-utils": [
+        "./dist/libs/shared-utils/index.d.ts",
+        "./libs/shared-utils/src/index.ts"
+      ],
+      "@org/shared-utils": [
+        "./dist/libs/shared-utils/index.d.ts",
+        "./libs/shared-utils/src/index.ts"
+      ]
     }
   }
 }
