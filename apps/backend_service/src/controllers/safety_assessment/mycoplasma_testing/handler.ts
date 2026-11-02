@@ -4,11 +4,35 @@ import { apiResponse, JsonWebToken } from "@oct-backend/shared-utils";
 
 const jsonWebToken = new JsonWebToken();
 
+const normalizeMycoplasmaPayload = (data: any) => {
+    if (data?.results && Array.isArray(data.results)) {
+        data.results = data.results.map((res: any) => {
+            if (res) {
+                if (res.negative_control_ct !== undefined && res.negative_control === undefined) {
+                    res.negative_control = res.negative_control_ct;
+                }
+                if (res.negative_control !== undefined && res.negative_control_ct === undefined) {
+                    if (typeof res.negative_control === 'number') {
+                        res.negative_control_ct = res.negative_control;
+                    } else if (typeof res.negative_control === 'string' && !isNaN(Number(res.negative_control))) {
+                        res.negative_control_ct = Number(res.negative_control);
+                    } else if (typeof res.negative_control === 'string' && res.negative_control_status === undefined) {
+                        res.negative_control_status = res.negative_control;
+                    }
+                }
+            }
+            return res;
+        });
+    }
+    return data;
+};
+
 class Handler {
 
     async create(req: any, res: any, next: any) {
         try {
             let { body, headers, query } = req;
+            body = normalizeMycoplasmaPayload(body);
             if (headers?.authorization) {
                 let token = headers.authorization.split(" ")[1];
                 if (token) {
@@ -39,6 +63,7 @@ class Handler {
     async upsert(req: any, res: any, next: any) {
         try {
             let { body } = req;
+            body = normalizeMycoplasmaPayload(body);
             body.updatedAt = new Date();
             let query: any = {};
             if (body?.id) {
@@ -71,6 +96,7 @@ class Handler {
     async update(req: any, res: any, next: any) {
         try {
             let { body, params } = req;
+            body = normalizeMycoplasmaPayload(body);
             body.updatedAt = new Date();
             let query = {
                 "id": params?.id

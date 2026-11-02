@@ -4,9 +4,9 @@ import mongoosePaginate from "mongoose-paginate-v2";
 
 const assayRulesSchema = new mongoose.Schema(
   {
-    cutoff: { type: Number },
-    borderline: { type: Number },
-    borderline_lower_limit: { type: Number },
+    cutoff: { type: Number, default: null },
+    borderline: { type: Number, default: null },
+    borderline_lower_limit: { type: Number, default: null },
     max_ct: { type: Number },
     internal_control_min: { type: Number },
     internal_control_max: { type: Number },
@@ -21,15 +21,17 @@ const mycoplasmaSampleSchema = new mongoose.Schema(
   {
     sample_id: { type: String },
     target_ct: { type: Number },
-    internal_control_ct: { type: Number }
+    internal_control_ct: { type: Number },
+    positive_control_ct: { type: Number },
+    negative_control_ct: { type: Number }
   },
   { _id: false }
 );
 
 const borderlineRangeSchema = new mongoose.Schema(
   {
-    lower_inclusive: { type: Number },
-    upper_exclusive: { type: Number }
+    lower_inclusive: { type: Number, default: null },
+    upper_exclusive: { type: Number, default: null }
   },
   { _id: false }
 );
@@ -43,10 +45,13 @@ const mycoplasmaResultSchema = new mongoose.Schema(
     internal_control_status: { type: String },
     positive_control_ct: { type: Number },
     positive_control_status: { type: String },
-    negative_control: { type: String },
+    negative_control_ct: { type: Number },
+    negative_control_status: { type: String },
+    negative_control: { type: mongoose.Schema.Types.Mixed },
     extraction_blank: { type: String },
-    delta_ct_target_minus_positive_control: { type: Number },
-    cutoff: { type: Number },
+    delta_ct_target_minus_positive_control: { type: Number, default: null },
+    delta_ct_target_minus_negative_control: { type: Number, default: null },
+    cutoff: { type: Number, default: null },
     borderline_range: borderlineRangeSchema,
     screening_result: { type: String },
     interpretation: { type: String },
@@ -61,7 +66,7 @@ const mycoplasmaTestingSchema = new mongoose.Schema(
     project_id: { type: Number },
     category: { type: String, default: "safety_assessment" },
     assay_type: { type: String, default: "Mycoplasma_qPCR" },
-    calculation_method: { type: String, default: "Ct cutoff-based screening" },
+    calculation_method: { type: String, default: "Target Ct vs negative control Ct" },
     assay_rules: assayRulesSchema,
     samples: [mycoplasmaSampleSchema],
     results: [mycoplasmaResultSchema],
