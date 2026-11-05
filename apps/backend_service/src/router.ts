@@ -11,10 +11,12 @@ import mycoplasmaTestingRouter from './controllers/safety_assessment/mycoplasma_
 import woundHealingRouter from './controllers/efficacy_assessment/wound_healing/router';
 import barrierIntegrityRouter from './controllers/efficacy_assessment/barrier_integrity/router';
 import efficacyAssessmentRouter from './controllers/efficacy_assessment/router';
+import dashboardRouter from './controllers/dashboard/router';
 
 const router = express.Router();
 
 router.use('/project', projectCodeRouter);
+router.use('/dashboard', dashboardRouter);
 router.use('/growth-factor-quantification', growthFactorQuantificationRouter);
 router.use('/mechanistic-analysis', mechanisticAnalysisRouter);
 router.use('/nociception-assay', nociceptionAssayRouter);
