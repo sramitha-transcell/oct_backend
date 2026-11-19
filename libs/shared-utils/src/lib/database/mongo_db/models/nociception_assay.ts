@@ -49,12 +49,24 @@ const nociceptionAssaySchema = new mongoose.Schema(
     assay_name: { type: String, default: "Nociception Assay" },
     category: { type: String, default: "mechanistic_analysis" },
     calculation_method: { type: String, default: "2^(-ΔΔCt)" },
-    calibrator: { type: String, default: "Control" },
-    samples: [mongoose.Schema.Types.Mixed],
+    control_group: { type: String, default: "Vehicle control" },
+    calibrator: { type: String, default: "Vehicle control" },
+    groups: [{ type: String }],
+    genes: [{ type: String }],
     markers: [{ type: String }],
+    biological_replicates: [{ type: String }],
+    formulas: { type: mongoose.Schema.Types.Mixed, default: {} },
+    cq_values: { type: mongoose.Schema.Types.Mixed, default: {} },
+    loading_control: [{ type: mongoose.Schema.Types.Mixed }],
+    dct_ddct_fold_change: [{ type: mongoose.Schema.Types.Mixed }],
+    biological_replicate_averages: [{ type: mongoose.Schema.Types.Mixed }],
+    final_result: [{ type: mongoose.Schema.Types.Mixed }],
     results: { type: mongoose.Schema.Types.Mixed, default: {} },
+    graph: { type: mongoose.Schema.Types.Mixed, default: {} },
     graphs: { type: mongoose.Schema.Types.Mixed, default: {} },
     images: { type: mongoose.Schema.Types.Mixed, default: {} },
+    samples: [mongoose.Schema.Types.Mixed],
+    data: { type: mongoose.Schema.Types.Mixed },
     meta: {
       status: { type: mongoose.Schema.Types.Mixed, default: true },
       message: { type: String, default: "qPCR Analysis Completed Successfully" }
@@ -65,7 +77,7 @@ const nociceptionAssaySchema = new mongoose.Schema(
     created_by_id: { type: Number },
     updated_by_id: { type: Number }
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 nociceptionAssaySchema.pre("save", async function () {

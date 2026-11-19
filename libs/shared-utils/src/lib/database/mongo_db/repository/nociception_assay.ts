@@ -17,6 +17,18 @@ const buildNociceptionAssayAggregationPipeline = (
     if (normalizedQuery.project_id !== undefined && !isNaN(Number(normalizedQuery.project_id))) {
         normalizedQuery.project_id = Number(normalizedQuery.project_id);
     }
+    if (Array.isArray(normalizedQuery.$or)) {
+        normalizedQuery.$or = normalizedQuery.$or.map((condition: any) => {
+            const cond = { ...condition };
+            if (cond.id !== undefined && !isNaN(Number(cond.id))) {
+                cond.id = Number(cond.id);
+            }
+            if (cond.project_id !== undefined && !isNaN(Number(cond.project_id))) {
+                cond.project_id = Number(cond.project_id);
+            }
+            return cond;
+        });
+    }
 
     const pipeline: mongoose.PipelineStage[] = [
         { $match: normalizedQuery },
@@ -42,12 +54,24 @@ const buildNociceptionAssayAggregationPipeline = (
                 assay_name: '$assay_name',
                 category: '$category',
                 calculation_method: '$calculation_method',
-                calibrator: '$calibrator',
+                control_group: { $ifNull: ['$control_group', '$calibrator'] },
+                calibrator: { $ifNull: ['$calibrator', '$control_group'] },
+                groups: '$groups',
+                genes: { $ifNull: ['$genes', '$markers'] },
+                markers: { $ifNull: ['$markers', '$genes'] },
+                biological_replicates: '$biological_replicates',
+                formulas: '$formulas',
+                cq_values: '$cq_values',
+                loading_control: '$loading_control',
+                dct_ddct_fold_change: '$dct_ddct_fold_change',
+                biological_replicate_averages: '$biological_replicate_averages',
+                final_result: { $ifNull: ['$final_result', '$results'] },
+                results: { $ifNull: ['$results', '$final_result'] },
+                graph: { $ifNull: ['$graph', '$graphs'] },
+                graphs: { $ifNull: ['$graphs', '$graph'] },
+                images: { $ifNull: ['$images', { $ifNull: ['$graphs', '$graph'] }] },
                 samples: '$samples',
-                markers: '$markers',
-                results: '$results',
-                graphs: '$graphs',
-                images: '$images',
+                data: '$data',
                 meta: '$meta',
                 message: '$message',
                 status: '$status',
@@ -118,12 +142,24 @@ const ListNociceptionAssay = async (query: any, per_page: number, page_no: numbe
     if (normalizedQuery.project_id !== undefined && !isNaN(Number(normalizedQuery.project_id))) {
         normalizedQuery.project_id = Number(normalizedQuery.project_id);
     }
+    if (Array.isArray(normalizedQuery.$or)) {
+        normalizedQuery.$or = normalizedQuery.$or.map((condition: any) => {
+            const cond = { ...condition };
+            if (cond.id !== undefined && !isNaN(Number(cond.id))) {
+                cond.id = Number(cond.id);
+            }
+            if (cond.project_id !== undefined && !isNaN(Number(cond.project_id))) {
+                cond.project_id = Number(cond.project_id);
+            }
+            return cond;
+        });
+    }
 
     const total_record = await NociceptionAssay.countDocuments(normalizedQuery);
 
     if (per_page === -1) {
         const resp = await NociceptionAssay.aggregate(
-            buildNociceptionAssayAggregationPipeline(query, sort)
+            buildNociceptionAssayAggregationPipeline(normalizedQuery, sort)
         ).exec();
 
         const pagination = {
@@ -139,7 +175,7 @@ const ListNociceptionAssay = async (query: any, per_page: number, page_no: numbe
     const skip_record = (page_no - 1) * per_page;
 
     const resp = await NociceptionAssay.aggregate(
-        buildNociceptionAssayAggregationPipeline(query, sort, skip_record, per_page)
+        buildNociceptionAssayAggregationPipeline(normalizedQuery, sort, skip_record, per_page)
     ).exec();
 
     const total_pages = Math.ceil(total_record / per_page);
@@ -181,12 +217,32 @@ const GetCountForNociceptionAssay = async (query: any) => {
 };
 
 const UpsertNociceptionAssay = async (query: any, data: any) => {
-    const existing = await NociceptionAssay.findOne(query);
+    const normalizedQuery = { ...query };
+    if (normalizedQuery.id !== undefined && !isNaN(Number(normalizedQuery.id))) {
+        normalizedQuery.id = Number(normalizedQuery.id);
+    }
+    if (normalizedQuery.project_id !== undefined && !isNaN(Number(normalizedQuery.project_id))) {
+        normalizedQuery.project_id = Number(normalizedQuery.project_id);
+    }
+    if (Array.isArray(normalizedQuery.$or)) {
+        normalizedQuery.$or = normalizedQuery.$or.map((condition: any) => {
+            const cond = { ...condition };
+            if (cond.id !== undefined && !isNaN(Number(cond.id))) {
+                cond.id = Number(cond.id);
+            }
+            if (cond.project_id !== undefined && !isNaN(Number(cond.project_id))) {
+                cond.project_id = Number(cond.project_id);
+            }
+            return cond;
+        });
+    }
+
+    const existing = await NociceptionAssay.findOne(normalizedQuery);
     if (!existing && (data.id == null || data.id === undefined)) {
         const latestDocument: any = await NociceptionAssay.findOne({}, {}, { sort: { id: -1 } });
         data.id = latestDocument ? latestDocument.id + 1 : 1;
     }
-    return await NociceptionAssay.findOneAndUpdate(query, { $set: data }, { upsert: true, new: true });
+    return await NociceptionAssay.findOneAndUpdate(normalizedQuery, { $set: data }, { upsert: true, new: true });
 };
 
 export {

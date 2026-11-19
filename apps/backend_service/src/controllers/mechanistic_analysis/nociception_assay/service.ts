@@ -5,7 +5,7 @@ import {
     deleteDocument,
     GetNociceptionAssay,
     ListNociceptionAssay,
-    upsertDocument  
+    UpsertNociceptionAssay
 } from '@oct-backend/shared-utils';
 
 class NociceptionAssayService {
@@ -19,7 +19,7 @@ class NociceptionAssayService {
     }
     async upsert(query: any, data: any) {
         try {
-            return await upsertDocument(NociceptionAssay, query, data);
+            return await UpsertNociceptionAssay(query, data);
         } catch (err) {
             console.log("Error ====>>>", err);
             throw err;

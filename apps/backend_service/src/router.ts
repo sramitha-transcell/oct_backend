@@ -12,11 +12,14 @@ import woundHealingRouter from './controllers/efficacy_assessment/wound_healing/
 import barrierIntegrityRouter from './controllers/efficacy_assessment/barrier_integrity/router';
 import efficacyAssessmentRouter from './controllers/efficacy_assessment/router';
 import dashboardRouter from './controllers/dashboard/router';
+import fileUploadRouter from './controllers/file_upload/router';
 
 const router = express.Router();
 
 router.use('/project', projectCodeRouter);
 router.use('/dashboard', dashboardRouter);
+router.use('/file-upload', fileUploadRouter);
+router.use('/file_upload', fileUploadRouter);
 router.use('/growth-factor-quantification', growthFactorQuantificationRouter);
 router.use('/mechanistic-analysis', mechanisticAnalysisRouter);
 router.use('/nociception-assay', nociceptionAssayRouter);

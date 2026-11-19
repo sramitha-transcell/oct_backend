@@ -10,6 +10,7 @@ export * from './lib/helpers/notification_middleware';
 export * from './lib/helpers/email_service';
 // export * from './lib/helpers/excelHelper';
 export * from './lib/helpers/generate_csv_file';
+export * from './lib/helpers/b2_storage';
 // export * from './lib/database/mongo_db/repository/payout';
 
 
@@ -30,6 +31,7 @@ export * from './lib/database/mongo_db/models/wound_healing';
 export * from './lib/database/mongo_db/models/induced_inflammation';
 export * from './lib/database/mongo_db/models/mycoplasma_testing';
 export * from './lib/database/mongo_db/models/barrier_integrity';
+export * from './lib/database/mongo_db/models/file_upload';
 
 
 
@@ -44,3 +46,4 @@ export * from './lib/database/mongo_db/repository/wound_healing';
 export * from './lib/database/mongo_db/repository/induced_inflammation';
 export * from './lib/database/mongo_db/repository/mycoplasma_testing';
 export * from './lib/database/mongo_db/repository/barrier_integrity';
+export * from './lib/database/mongo_db/repository/file_upload';
