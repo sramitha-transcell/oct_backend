@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nx serve @org/backend_service",
     "serve": "nx serve @org/backend_service",
-    "build": "nx build @org/backend_service"
+    "build": "nx build @org/backend_service && esbuild scripts/vercel-entry.ts --bundle --platform=node --format=esm --packages=external --outfile=api/index.js"
   },
   "type": "module",
   "private": true,
