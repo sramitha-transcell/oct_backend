@@ -34,7 +34,7 @@ async function fetchEnvByApi(apiUrl?: string): Promise<void> {
   }
 }
 
-export default async function init(app: any) {
+export async function init(app: any) {
 
   function customLogger(tokens: any, req: any, res: any) {
     const date = new Date().toISOString(); // Current timestamp
@@ -117,24 +117,33 @@ export default async function init(app: any) {
       });
     });
 
-    const server = app.listen(GlobalEnv?.PORT || 3001, () => {
-      console.log(`Backend_Application server listening on port : ${GlobalEnv?.PORT || 3001}`);
-    });
+    // In local development, listen on port.
+    // In serverless environments (e.g. Vercel), Vercel handles incoming requests directly.
+    if (!process.env.VERCEL) {
+      const server = app.listen(GlobalEnv?.PORT || 3001, () => {
+        console.log(`Backend_Application server listening on port : ${GlobalEnv?.PORT || 3001}`);
+      });
 
-    server.on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE') {
-        console.error(`\n❌ Port ${GlobalEnv?.PORT || 3001} is already in use by another process.`);
-        console.error(`Please kill the process holding port ${GlobalEnv?.PORT || 3001} or change the PORT in config/env.ts.\n`);
-      } else {
-        console.error("Server error =====>>>>", err);
-      }
-      process.exit(1);
-    });
+      server.on('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          console.error(`\n❌ Port ${GlobalEnv?.PORT || 3001} is already in use by another process.`);
+          console.error(`Please kill the process holding port ${GlobalEnv?.PORT || 3001} or change the PORT in config/env.ts.\n`);
+        } else {
+          console.error("Server error =====>>>>", err);
+        }
+        process.exit(1);
+      });
+    }
   } catch (err) {
     console.log("App Error =====>>>>", err);
-    process.exit(1);
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    }
   }
 }
 
 const app = express();
-init(app);
+const initPromise = init(app);
+
+export { app, initPromise };
+export default app;
