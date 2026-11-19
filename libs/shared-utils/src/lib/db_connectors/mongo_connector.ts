@@ -10,6 +10,9 @@ import mongoose from 'mongoose';
   // const MONGODB_URI="mongodb://adya_buyer:adya_buyer@4.240.98.192:27020/Atma-buyerapp"
   // Connect to MongoDB with retry logic
   export const connectWithRetry = async (MONGODB_URI:string) => {
+    if (mongoose.connection.readyState >= 1) {
+      return;
+    }
     console.log("MONGODB_URI", MONGODB_URI);
     if (!MONGODB_URI) {
       console.error('MONGODB_URI is not defined.');
