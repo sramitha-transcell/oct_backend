@@ -1149,6 +1149,7 @@ var fileUploadSchema = new mongoose11.Schema(
     id: { type: Number, unique: true },
     project_id: { type: Number },
     category: { type: String, default: "general" },
+    sub_category: { type: String },
     filename: { type: String, required: true },
     file_type: { type: String },
     mime_type: { type: String },
@@ -1202,7 +1203,7 @@ fileUploadSchema.pre("save", async function() {
     this.expires_at = new Date(this.created_at.getTime() + this.expires_in * 1e3);
   }
 });
-fileUploadSchema.index({ id: 1, createdAt: -1, project_id: 1, category: 1, object_key: 1, expires_at: 1 });
+fileUploadSchema.index({ id: 1, createdAt: -1, project_id: 1, category: 1, sub_category: 1, object_key: 1, expires_at: 1 });
 fileUploadSchema.plugin(mongoosePaginate9);
 var FileUpload = mongoose11.model(
   "file_upload",
@@ -2176,6 +2177,7 @@ var buildFileUploadAggregationPipeline = (query, sort, skip, limit) => {
         id: "$id",
         project_id: "$project_id",
         category: "$category",
+        sub_category: "$sub_category",
         filename: "$filename",
         file_type: "$file_type",
         mime_type: "$mime_type",
@@ -5995,11 +5997,13 @@ var Handler10 = class {
       const body = req.body;
       let items = [];
       let fallbackCategory = "general";
+      let fallbackSubCategory;
       let fallbackProjectId;
       if (Array.isArray(body)) {
         items = body;
       } else if (body && typeof body === "object") {
         fallbackCategory = body.category || "general";
+        fallbackSubCategory = body.sub_category || body.subCategory;
         fallbackProjectId = body.project_id !== void 0 ? Number(body.project_id) : body.projectId !== void 0 ? Number(body.projectId) : void 0;
         items = body.files || body.images || body.records || [];
       }
@@ -6008,7 +6012,7 @@ var Handler10 = class {
           apiResponse.FAILURE_RESP({}, { name: "ValidationError", message: "No records provided for bulk create" }, "No records provided")
         );
       }
-      const normalizedList = items.map((item) => normalizeFileRecord(item, fallbackCategory, fallbackProjectId));
+      const normalizedList = items.map((item) => normalizeFileRecord(item, fallbackCategory, fallbackProjectId, fallbackSubCategory));
       const created = await newService10.bulkCreateRecords(normalizedList);
       return res.status(201).json(
         apiResponse.SUCCESS_RESP(created, `Bulk created ${normalizedList.length} file record(s) successfully`)
@@ -6065,6 +6069,9 @@ var Handler10 = class {
       const mongoQuery = {};
       if (queryParams.category) {
         mongoQuery.category = queryParams.category;
+      }
+      if (queryParams.sub_category || queryParams.subCategory) {
+        mongoQuery.sub_category = queryParams.sub_category || queryParams.subCategory;
       }
       if (queryParams.project_id || queryParams.projectId) {
         mongoQuery.project_id = Number(queryParams.project_id || queryParams.projectId);
@@ -6191,11 +6198,12 @@ function parseTimestampToDate(val) {
   const d = new Date(val);
   return isNaN(d.getTime()) ? void 0 : d;
 }
-function normalizeFileRecord(item, fallbackCategory = "general", fallbackProjectId) {
+function normalizeFileRecord(item, fallbackCategory = "general", fallbackProjectId, fallbackSubCategory) {
   const filename = item.filename;
   const object_key = item.object_key || item.objectKey;
   const file_url = item.file_url || item.fileUrl;
   const category = item.category || fallbackCategory;
+  const sub_category = item.sub_category || item.subCategory || fallbackSubCategory;
   const mime_type = item.mime_type || item.mimeType;
   const file_type = item.file_type || item.fileType;
   const size = item.size !== void 0 ? Number(item.size) : void 0;
@@ -6211,6 +6219,7 @@ function normalizeFileRecord(item, fallbackCategory = "general", fallbackProject
     object_key,
     file_url,
     category,
+    sub_category,
     file_type,
     mime_type,
     size,
@@ -6348,6 +6357,8 @@ var SingleFileRecordSchema = z9.object({
   file_url: z9.string().min(1, "file_url is required").optional(),
   fileUrl: z9.string().min(1, "fileUrl is required").optional(),
   category: z9.string().optional().default("general"),
+  sub_category: z9.string().optional(),
+  subCategory: z9.string().optional(),
   file_type: z9.string().optional(),
   fileType: z9.string().optional(),
   mime_type: z9.string().optional(),
@@ -6421,10 +6432,12 @@ function validateBulkCreateRecords(req, res, next) {
     );
   }
   const parentCategory = req.body?.category;
+  const parentSubCategory = req.body?.sub_category || req.body?.subCategory;
   const parentProjectId = req.body?.project_id || req.body?.projectId;
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (parentCategory && !item.category) item.category = parentCategory;
+    if (parentSubCategory && !item.sub_category && !item.subCategory) item.sub_category = parentSubCategory;
     if (parentProjectId && !item.project_id && !item.projectId) item.project_id = parentProjectId;
     const result = SingleFileRecordSchema.safeParse(item);
     if (!result.success) {
@@ -6440,6 +6453,8 @@ var UpdateFileRecordSchema = z9.object({
   object_key: z9.string().optional(),
   file_url: z9.string().optional(),
   category: z9.string().optional(),
+  sub_category: z9.string().optional(),
+  subCategory: z9.string().optional(),
   file_type: z9.string().optional(),
   mime_type: z9.string().optional(),
   project_id: z9.union([z9.number(), z9.string().regex(/^\d+$/).transform(Number)]).optional(),

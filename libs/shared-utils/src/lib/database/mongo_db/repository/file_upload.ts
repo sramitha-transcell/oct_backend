@@ -48,6 +48,7 @@ const buildFileUploadAggregationPipeline = (
                 id: '$id',
                 project_id: '$project_id',
                 category: '$category',
+                sub_category: '$sub_category',
                 filename: '$filename',
                 file_type: '$file_type',
                 mime_type: '$mime_type',

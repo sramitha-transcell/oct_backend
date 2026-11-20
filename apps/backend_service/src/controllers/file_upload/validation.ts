@@ -173,6 +173,8 @@ export const SingleFileRecordSchema = z.object({
     file_url: z.string().min(1, 'file_url is required').optional(),
     fileUrl: z.string().min(1, 'fileUrl is required').optional(),
     category: z.string().optional().default('general'),
+    sub_category: z.string().optional(),
+    subCategory: z.string().optional(),
     file_type: z.string().optional(),
     fileType: z.string().optional(),
     mime_type: z.string().optional(),
@@ -255,11 +257,13 @@ export function validateBulkCreateRecords(req: any, res: any, next: any) {
     }
 
     const parentCategory = req.body?.category;
+    const parentSubCategory = req.body?.sub_category || req.body?.subCategory;
     const parentProjectId = req.body?.project_id || req.body?.projectId;
 
     for (let i = 0; i < items.length; i++) {
         const item = items[i];
         if (parentCategory && !item.category) item.category = parentCategory;
+        if (parentSubCategory && !item.sub_category && !item.subCategory) item.sub_category = parentSubCategory;
         if (parentProjectId && !item.project_id && !item.projectId) item.project_id = parentProjectId;
 
         const result = SingleFileRecordSchema.safeParse(item);
@@ -278,6 +282,8 @@ export const UpdateFileRecordSchema = z.object({
     object_key: z.string().optional(),
     file_url: z.string().optional(),
     category: z.string().optional(),
+    sub_category: z.string().optional(),
+    subCategory: z.string().optional(),
     file_type: z.string().optional(),
     mime_type: z.string().optional(),
     project_id: z.union([z.number(), z.string().regex(/^\d+$/).transform(Number)]).optional(),

@@ -290,12 +290,14 @@ class Handler {
             const body = req.body;
             let items: any[] = [];
             let fallbackCategory = 'general';
+            let fallbackSubCategory: string | undefined;
             let fallbackProjectId: number | undefined;
 
             if (Array.isArray(body)) {
                 items = body;
             } else if (body && typeof body === 'object') {
                 fallbackCategory = body.category || 'general';
+                fallbackSubCategory = body.sub_category || body.subCategory;
                 fallbackProjectId = body.project_id !== undefined ? Number(body.project_id) : (body.projectId !== undefined ? Number(body.projectId) : undefined);
                 items = body.files || body.images || body.records || [];
             }
@@ -306,7 +308,7 @@ class Handler {
                 );
             }
 
-            const normalizedList = items.map((item: any) => normalizeFileRecord(item, fallbackCategory, fallbackProjectId));
+            const normalizedList = items.map((item: any) => normalizeFileRecord(item, fallbackCategory, fallbackProjectId, fallbackSubCategory));
             const created = await newService.bulkCreateRecords(normalizedList);
 
             return res.status(201).json(
@@ -372,6 +374,9 @@ class Handler {
 
             if (queryParams.category) {
                 mongoQuery.category = queryParams.category;
+            }
+            if (queryParams.sub_category || queryParams.subCategory) {
+                mongoQuery.sub_category = queryParams.sub_category || queryParams.subCategory;
             }
             if (queryParams.project_id || queryParams.projectId) {
                 mongoQuery.project_id = Number(queryParams.project_id || queryParams.projectId);
@@ -516,11 +521,12 @@ function parseTimestampToDate(val: any): Date | undefined {
     return isNaN(d.getTime()) ? undefined : d;
 }
 
-function normalizeFileRecord(item: any, fallbackCategory = 'general', fallbackProjectId?: number) {
+function normalizeFileRecord(item: any, fallbackCategory = 'general', fallbackProjectId?: number, fallbackSubCategory?: string) {
     const filename = item.filename;
     const object_key = item.object_key || item.objectKey;
     const file_url = item.file_url || item.fileUrl;
     const category = item.category || fallbackCategory;
+    const sub_category = item.sub_category || item.subCategory || fallbackSubCategory;
     const mime_type = item.mime_type || item.mimeType;
     const file_type = item.file_type || item.fileType;
     const size = item.size !== undefined ? Number(item.size) : undefined;
@@ -538,6 +544,7 @@ function normalizeFileRecord(item: any, fallbackCategory = 'general', fallbackPr
         object_key,
         file_url,
         category,
+        sub_category,
         file_type,
         mime_type,
         size,

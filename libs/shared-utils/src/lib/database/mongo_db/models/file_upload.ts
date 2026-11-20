@@ -7,6 +7,7 @@ const fileUploadSchema = new mongoose.Schema(
     id: { type: Number, unique: true },
     project_id: { type: Number },
     category: { type: String, default: "general" },
+    sub_category: { type: String },
     filename: { type: String, required: true },
     file_type: { type: String },
     mime_type: { type: String },
@@ -63,7 +64,7 @@ fileUploadSchema.pre("save", async function () {
   }
 });
 
-fileUploadSchema.index({ id: 1, createdAt: -1, project_id: 1, category: 1, object_key: 1, expires_at: 1 });
+fileUploadSchema.index({ id: 1, createdAt: -1, project_id: 1, category: 1, sub_category: 1, object_key: 1, expires_at: 1 });
 fileUploadSchema.plugin(mongoosePaginate);
 
 const FileUpload = mongoose.model(
